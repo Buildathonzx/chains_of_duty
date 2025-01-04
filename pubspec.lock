@@ -113,7 +113,7 @@ packages:
   chains_of_duty_lib:
     dependency: "direct main"
     description:
-      path: "../chains_of_duty_lib"
+      path: chains_of_duty_lib
       relative: true
     source: path
     version: "0.0.1"
