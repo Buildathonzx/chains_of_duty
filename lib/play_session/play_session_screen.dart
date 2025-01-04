@@ -15,7 +15,6 @@ import '../game_internals/level_state.dart';
 import '../game_internals/score.dart';
 import '../level_selection/levels.dart';
 import '../player_progress/player_progress.dart';
-import '../style/confetti.dart';
 import '../style/my_button.dart';
 import '../style/palette.dart';
 import 'game_widget.dart';
@@ -108,18 +107,6 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                     ),
                   ),
                 ],
-              ),
-              // This is the confetti animation that is overlaid on top of the
-              // game when the player wins.
-              SizedBox.expand(
-                child: Visibility(
-                  visible: _duringCelebration,
-                  child: IgnorePointer(
-                    child: Confetti(
-                      isStopped: !_duringCelebration,
-                    ),
-                  ),
-                ),
               ),
             ],
           ),

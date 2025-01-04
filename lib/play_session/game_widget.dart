@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:chains_of_duty_lib/gameplay/shooter_game.dart';
 
 import '../audio/audio_controller.dart';
 import '../audio/sounds.dart';
@@ -17,23 +18,6 @@ class GameWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final level = context.watch<GameLevel>();
-    final levelState = context.watch<LevelState>();
-
-    return Column(
-      children: [
-        Text('Drag the slider to ${level.difficulty}% or above!'),
-        Slider(
-          label: 'Level Progress',
-          autofocus: true,
-          value: levelState.progress / 100,
-          onChanged: (value) => levelState.setProgress((value * 100).round()),
-          onChangeEnd: (value) {
-            context.read<AudioController>().playSfx(SfxType.wssh);
-            levelState.evaluate();
-          },
-        ),
-      ],
-    );
+    return const ShooterGame();
   }
 }
