@@ -16,6 +16,9 @@ Welcome to Chains of Duty, an action-packed, web-first shooter bringing realisti
 - **Continuous Development**  
   Regular updates introduce new maps, weapons, gameplay tweaks, and bug fixes to keep the experience fresh.
 
+## Fundamentals of Gameplay
+A new route "fundamentals" showcases basic shooter functionality. Core logic resides in the `chains_of_duty_lib` folder.
+
 ## Getting Started
 
 1. **Clone or Dowload**  

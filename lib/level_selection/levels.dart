@@ -15,6 +15,7 @@ const gameLevels = [
   GameLevel(
     number: 2,
     difficulty: 42,
+    enemies: 10,
   ),
   GameLevel(
     number: 3,
@@ -34,11 +35,14 @@ class GameLevel {
 
   final String? achievementIdAndroid;
 
+  final int enemies;
+
   bool get awardsAchievement => achievementIdAndroid != null;
 
   const GameLevel({
     required this.number,
     required this.difficulty,
+    required this.enemies,
     this.achievementIdIOS,
     this.achievementIdAndroid,
   }) : assert(
