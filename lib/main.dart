@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:chains_of_duty_lib/chains_of_duty_lib.dart';
+import '../../chains_of_duty_lib/lib/chains_of_duty_lib.dart';
 
 import 'app_lifecycle/app_lifecycle.dart';
 import 'audio/audio_controller.dart';

@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:chains_of_duty_lib/gameplay/fundamental_game_screen.dart';
+import '../../chains_of_duty_lib/lib/gameplay/fundamental_game_screen.dart';
 
 import 'game_internals/score.dart';
 import 'level_selection/level_selection_screen.dart';
