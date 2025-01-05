@@ -47,10 +47,12 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
 
   late DateTime _startOfPlay;
 
+  late MultiPlayerShooterGame _game;
+
   @override
   void initState() {
     super.initState();
-
+    _game = MultiPlayerShooterGame();
     _startOfPlay = DateTime.now();
   }
 
@@ -79,7 +81,7 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
             builder: (context, constraints) {
               return SizedBox.expand(
                 child: MyGameWidget(
-                  game: MultiPlayerShooterGame(),
+                  game: _game,
                   overlayBuilderMap: {
                     'PauseMenu': (ctx, game) => _paused
                         ? Container(
@@ -94,7 +96,12 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
             },
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () => setState(() => _paused = !_paused),
+            onPressed: () {
+              setState(() {
+                _paused = !_paused;
+                _game.togglePause();
+              });
+            },
             child: Icon(_paused ? Icons.play_arrow : Icons.pause),
           ),
         ),

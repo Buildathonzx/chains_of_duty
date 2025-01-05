@@ -87,7 +87,7 @@ class EnemySquare extends SpriteComponent {
   }
 
   @override
-  void update(double dt) {
+  void update(double(dt) {
     super.update(dt);
     position += direction * _speed * dt;
   }
@@ -290,11 +290,14 @@ class OpponentSquare extends SpriteComponent with HasGameRef<FlameGame> {
 }
 
 // Enhanced MultiPlayerShooterGame
-class MultiPlayerShooterGame extends FlameGame with HasCollisionDetection {
+class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollisionDetection {
   late ParkourPlayer player;
   late Villain villain;
   final List<Platform> platforms = [];
   int currentLevel = 1;
+  bool isPaused = false;
+  Vector2 cameraOffset = Vector2.zero();
+  double parallaxEffect = 0;
 
   @override
   Future<void> onLoad() async {
@@ -317,6 +320,90 @@ class MultiPlayerShooterGame extends FlameGame with HasCollisionDetection {
 
     // Add visual effects
     add(WeatherSystem());
+
+    // Initialize camera
+    camera.followComponent(player);
+  }
+
+  @override
+  void update(double dt) {
+    if (!isPaused) {
+      super.update(dt);
+      
+      // Update camera position with parallax effect
+      final targetX = player.position.x - size.x / 2;
+      cameraOffset.x = targetX;
+      parallaxEffect = (targetX / size.x) * 100; // Adjust multiplier for stronger/weaker effect
+      
+      // Update chain swinging
+      children.whereType<ChainLink>().forEach((chain) {
+        chain.swingAngle = math.sin(currentTime * 2) * 0.3 + (parallaxEffect * 0.001);
+      });
+    }
+  }
+
+  @override
+  KeyEventResult onKeyEvent(
+    RawKeyEvent event,
+    Set<LogicalKeyboardKey> keysPressed,
+  ) {
+    final isKeyDown = event is RawKeyDownEvent;
+
+    // Handle player movement
+    if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
+      player.velocity.x = -ParkourPlayer.MOVE_SPEED;
+    } else if (keysPressed.contains(LogicalKeyboardKey.arrowRight)) {
+      player.velocity.x = ParkourPlayer.MOVE_SPEED;
+    } else {
+      player.velocity.x = 0;
+    }
+
+    // Handle jumping
+    if (isKeyDown && keysPressed.contains(LogicalKeyboardKey.space) && player.isOnGround) {
+      player.velocity.y = ParkourPlayer.JUMP_VELOCITY;
+      player.isOnGround = false;
+    }
+
+    // Handle chain swinging
+    if (isKeyDown && keysPressed.contains(LogicalKeyboardKey.keyE)) {
+      _tryAttachToNearestChain();
+    }
+
+    return KeyEventResult.handled;
+  }
+
+  void togglePause() {
+    isPaused = !isPaused;
+    if (isPaused) {
+      overlays.add('PauseMenu');
+    } else {
+      overlays.remove('PauseMenu');
+    }
+  }
+
+  void _tryAttachToNearestChain() {
+    if (player.isSwinging) {
+      player.isSwinging = false;
+      player.attachedChain = null;
+      return;
+    }
+
+    // Find nearest chain
+    ChainLink? nearestChain;
+    double nearestDistance = double.infinity;
+
+    children.whereType<ChainLink>().forEach((chain) {
+      final distance = chain.position.distanceTo(player.position);
+      if (distance < 100 && distance < nearestDistance) { // Adjust range as needed
+        nearestChain = chain;
+        nearestDistance = distance;
+      }
+    });
+
+    if (nearestChain != null) {
+      player.attachedChain = nearestChain;
+      player.isSwinging = true;
+    }
   }
 
   void _generatePlatforms() {
