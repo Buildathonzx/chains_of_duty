@@ -78,7 +78,7 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
           body: LayoutBuilder(
             builder: (context, constraints) {
               return SizedBox.expand(
-                child: GameWidget(
+                child: MyGameWidget(
                   game: MultiPlayerShooterGame(),
                   overlayBuilderMap: {
                     'PauseMenu': (ctx, game) => _paused
@@ -89,7 +89,6 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                           )
                         : const SizedBox.shrink(),
                   },
-                  fullscreen: true,
                 ),
               );
             },

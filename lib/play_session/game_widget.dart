@@ -29,8 +29,7 @@ class MyGameWidget extends StatelessWidget {
     return flame.GameWidget(
       game: game,
       overlayBuilderMap: overlayBuilderMap,
-      // Ensure the game takes the full screen
-      fullscreen: true,
+      // Remove fullscreen: true since Flame 1.x GameWidget doesn't support it
     );
   }
 }
