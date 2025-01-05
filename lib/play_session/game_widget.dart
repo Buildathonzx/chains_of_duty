@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flame/game.dart' as flame;
 import 'package:chains_of_duty_lib/gameplay/shooter_game.dart';
 
 import '../audio/audio_controller.dart';
@@ -18,6 +19,8 @@ class GameWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ShooterGame();
+    return flame.GameWidget(
+      game: ShooterGame(),
+    );
   }
 }

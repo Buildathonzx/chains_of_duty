@@ -1,23 +1,30 @@
+import 'package:flame/game.dart';
+import 'package:flame/components.dart';
+import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
+import 'package:chains_of_duty/lib/style/characters.dart';
 
-class ShooterGame extends StatefulWidget {
-  const ShooterGame({super.key});
+class ShooterGame extends FlameGame with HasTappables, HasCollidables {
+  late PlayerCharacter _playerData;
 
   @override
-  State<ShooterGame> createState() => _ShooterGameState();
-}
+  Future<void> onLoad() async {
+    await super.onLoad();
+    camera.viewport = FixedResolutionViewport(Vector2(400, 700));
+    _playerData = PlayerCharacter();
 
-class _ShooterGameState extends State<ShooterGame> {
+    final playerSprite = SpriteComponent()
+      ..sprite = await loadSprite('player.png')
+      ..position = Vector2(200, 600)
+      ..size = Vector2(50, 50);
+    add(playerSprite);
+  }
+
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: const Center(
-        child: Text(
-          'Shooter Game',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-    );
+  void update(double dt) {
+    super.update(dt);
+    if (!_playerData.isAlive()) {
+      // handle player death
+    }
   }
 }
