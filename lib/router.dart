@@ -104,6 +104,16 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/play',
       builder: (context, state) => const LevelSelectionScreen(),
+      routes: [
+        GoRoute(
+          path: 'session/:level',
+          builder: (context, state) {
+            final levelNumber = int.parse(state.pathParameters['level']!);
+            final level = gameLevels.singleWhere((e) => e.number == levelNumber);
+            return PlaySessionScreen(level);
+          },
+        ),
+      ],
     ),
   ],
 );
