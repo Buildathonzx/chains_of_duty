@@ -324,9 +324,13 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
     // Add visual effects
     add(WeatherSystem());
 
-    // Set up the camera with fixed viewport
-    camera.viewport = FixedResolutionViewport(Vector2(800, 600));
-    camera.position = Vector2(400, 300); // Center camera
+    // Set up camera with fixed viewport using defaultCamera
+    final worldRect = Rect.fromLTWH(0, 0, 2000, 2000);
+    camera = CameraComponent(world: world)
+      ..viewfinder.visibleGameSize = Vector2(800, 600)
+      ..viewfinder.position = Vector2(400, 300)
+      ..viewfinder.anchor = Anchor.center
+      ..follow(player);
   }
 
   @override
@@ -345,11 +349,11 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
         chain.swingAngle = math.sin(gameTime * 0.002) * 0.3 + (parallaxEffect * 0.001);
       });
 
-      // Update camera position to follow player
-      camera.moveTo(Vector2(
-        player.position.x - size.x / 2,
-        player.position.y - size.y / 2
-      ));
+      // Remove manual camera positioning
+      // camera.moveTo(Vector2(
+      //   player.position.x - size.x / 2,
+      //   player.position.y - size.y / 2
+      // ));
     }
   }
 
