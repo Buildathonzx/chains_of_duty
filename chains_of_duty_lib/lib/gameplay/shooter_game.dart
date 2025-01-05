@@ -6,6 +6,7 @@ import 'package:flame/collisions.dart';  // Add this import
 import 'package:flutter/material.dart';
 import 'package:chains_of_duty_lib/style/characters.dart';
 import 'package:flame/input.dart';
+import 'package:flutter/services.dart';  // Add this import
 
 class ShooterWorld extends World {
   final _random = math.Random();
@@ -347,26 +348,28 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
     RawKeyEvent event,
     Set<LogicalKeyboardKey> keysPressed,
   ) {
-    final isKeyDown = event is RawKeyDownEvent;
+    if (!isPaused) {
+      final isKeyDown = event is RawKeyDownEvent;
 
-    // Handle player movement
-    if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
-      player.velocity.x = -ParkourPlayer.MOVE_SPEED;
-    } else if (keysPressed.contains(LogicalKeyboardKey.arrowRight)) {
-      player.velocity.x = ParkourPlayer.MOVE_SPEED;
-    } else {
-      player.velocity.x = 0;
-    }
+      // Handle player movement
+      if (keysPressed.contains(const LogicalKeyboardKey(0x00070050))) { // Left arrow
+        player.velocity.x = -ParkourPlayer.MOVE_SPEED;
+      } else if (keysPressed.contains(const LogicalKeyboardKey(0x0700004F))) { // Right arrow
+        player.velocity.x = ParkourPlayer.MOVE_SPEED;
+      } else {
+        player.velocity.x = 0;
+      }
 
-    // Handle jumping
-    if (isKeyDown && keysPressed.contains(LogicalKeyboardKey.space) && player.isOnGround) {
-      player.velocity.y = ParkourPlayer.JUMP_VELOCITY;
-      player.isOnGround = false;
-    }
+      // Handle jumping
+      if (isKeyDown && keysPressed.contains(const LogicalKeyboardKey(0x00070044)) && player.isOnGround) { // Space
+        player.velocity.y = ParkourPlayer.JUMP_VELOCITY;
+        player.isOnGround = false;
+      }
 
-    // Handle chain swinging
-    if (isKeyDown && keysPressed.contains(LogicalKeyboardKey.keyE)) {
-      _tryAttachToNearestChain();
+      // Handle chain swinging
+      if (isKeyDown && keysPressed.contains(const LogicalKeyboardKey(0x00070014))) { // E key
+        _tryAttachToNearestChain();
+      }
     }
 
     return KeyEventResult.handled;

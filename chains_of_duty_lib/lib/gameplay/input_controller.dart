@@ -2,7 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/services.dart';
 
-class GameInputController extends KeyboardEventListener {
+class GameInputController with KeyboardEventListener {
   bool leftPressed = false;
   bool rightPressed = false;
   bool jumpPressed = false;
@@ -20,4 +20,7 @@ class GameInputController extends KeyboardEventListener {
 
     return true;
   }
+}
+
+mixin KeyboardEventListener {
 }
