@@ -17,7 +17,6 @@ class ShooterWorld extends World {
 
   @override
   void onTapDown(TapDownEvent event) {
-    super.onTapDown(event);
     if (!event.handled) {
       add(PlayerSquare(event.localPosition));
       event.handled = true;
@@ -191,7 +190,7 @@ class OpponentSquare extends SpriteComponent with HasGameRef<MultiPlayerShooterG
 }
 
 // Enhanced MultiPlayerShooterGame
-class MultiPlayerShooterGame extends FlameGame with HasTappables, HasDraggables {
+class MultiPlayerShooterGame extends FlameGame {
   late PlayerSquare player1;
   late PlayerSquare player2;
 
@@ -238,12 +237,6 @@ class MultiPlayerShooterGame extends FlameGame with HasTappables, HasDraggables 
         }
       });
     });
-  }
-
-  // Convert the loaded image to Sprite:
-  Future<Sprite> loadSprite(String assetName) async {
-    final image = await images.load(assetName);
-    return Sprite(image);
   }
 }
 
