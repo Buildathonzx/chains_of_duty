@@ -14,8 +14,8 @@ import '../level_selection/levels.dart';
 
 /// This widget defines the game UI itself, without things like the settings
 /// button or the back button.
-class GameWidget extends StatelessWidget {
-  const GameWidget({super.key});
+class MyGameWidget extends StatelessWidget {
+  const MyGameWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

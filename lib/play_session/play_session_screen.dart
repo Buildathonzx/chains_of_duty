@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart' hide Level;
 import 'package:provider/provider.dart';
 import 'package:flame/game.dart';
+import 'package:chains_of_duty_lib/gameplay/shooter_game.dart';
 
 import '../audio/audio_controller.dart';
 import '../audio/sounds.dart';
@@ -99,7 +100,7 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                   const Spacer(),
                   Expanded(
                     // The actual UI of the game.
-                    child: GameWidget(
+                    child: MyGameWidget(
                       game: ShooterGame(),
                       overlayBuilderMap: {
                         'PauseMenu': (ctx, game) => _paused

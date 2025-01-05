@@ -52,12 +52,12 @@ class PlayerSquare extends SpriteComponent with TapCallbacks {
   }
 }
 
-class ShooterGame extends FlameGame with HasTappableComponents {
+class ShooterGame extends FlameGame {
   ShooterGame() : super(world: ShooterWorld());
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    camera.viewport = FixedResolutionViewport(Vector2(400, 700));
+    camera.zoom = 1.0;
   }
 }
