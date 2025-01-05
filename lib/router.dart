@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:chains_of_duty_lib/gameplay/fundamental_game_screen.dart';
+import 'package:chains_of_duty_lib/gameplay/splash_screen.dart';
 
 import 'game_internals/score.dart';
 import 'level_selection/level_selection_screen.dart';
@@ -23,6 +24,10 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
+      builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/main_menu',
       builder: (context, state) => const MainMenuScreen(key: Key('main menu')),
       routes: [
         GoRoute(

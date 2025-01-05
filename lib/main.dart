@@ -11,6 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import 'package:chains_of_duty_lib/chains_of_duty_lib.dart';
+import 'package:chains_of_duty_lib/gameplay/splash_screen.dart';
 
 import 'app_lifecycle/app_lifecycle.dart';
 import 'audio/audio_controller.dart';
@@ -76,7 +77,7 @@ class MyApp extends StatelessWidget {
         child: Builder(builder: (context) {
           final palette = context.watch<Palette>();
 
-          return MaterialApp.router(
+          return MaterialApp(
             title: 'My Flutter Game',
             theme: ThemeData.from(
               colorScheme: ColorScheme.fromSeed(
@@ -98,6 +99,7 @@ class MyApp extends StatelessWidget {
                 ),
               ),
             ),
+            home: const SplashScreen(),
             routerConfig: router,
           );
         }),
