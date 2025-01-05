@@ -324,9 +324,9 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
     // Add visual effects
     add(WeatherSystem());
 
-    // Use camera viewport instead of followComponent
-    camera.viewport = FixedViewport(800, 600);
-    camera.moveTo(Vector2(400, 300)); // Center camera
+    // Set up the camera with fixed viewport
+    camera.viewport = FixedResolutionViewport(Vector2(800, 600));
+    camera.position = Vector2(400, 300); // Center camera
   }
 
   @override
