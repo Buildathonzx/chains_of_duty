@@ -403,7 +403,7 @@ class ChainLink extends PositionComponent with HasGameRef<MultiPlayerShooterGame
   @override
   void update(double dt) {
     super.update(dt);
-    swingAngle = math.sin(gameRef.currentTime * 2) * 0.3;  // Use gameRef instead of game
+    swingAngle = math.sin(gameRef.currentTime() * 2) * 0.3;  // Use gameRef instead of game
   }
 
   @override
