@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/collisions.dart';  // Add this import
 import 'package:flutter/material.dart';
+import 'package:flame/camera.dart';  // Add this import
 import 'package:chains_of_duty_lib/style/characters.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/services.dart';  // Add this import
@@ -88,7 +89,7 @@ class EnemySquare extends SpriteComponent {
   }
 
   @override
-  void update(double(dt) {
+  void update(double dt) { // Fix method signature
     super.update(dt);
     position += direction * _speed * dt;
   }
@@ -322,8 +323,9 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
     // Add visual effects
     add(WeatherSystem());
 
-    // Initialize camera
-    camera.followComponent(player);
+    // Use camera viewport instead of followComponent
+    camera.viewport = FixedViewport(800, 600);
+    camera.moveTo(Vector2(400, 300)); // Center camera
   }
 
   @override
@@ -334,12 +336,19 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
       // Update camera position with parallax effect
       final targetX = player.position.x - size.x / 2;
       cameraOffset.x = targetX;
-      parallaxEffect = (targetX / size.x) * 100; // Adjust multiplier for stronger/weaker effect
+      parallaxEffect = (targetX / size.x) * 100;
       
-      // Update chain swinging
+      // Update chain swinging using game time
+      final gameTime = dt * 1000; // Convert to milliseconds
       children.whereType<ChainLink>().forEach((chain) {
-        chain.swingAngle = math.sin(currentTime * 2) * 0.3 + (parallaxEffect * 0.001);
+        chain.swingAngle = math.sin(gameTime * 0.002) * 0.3 + (parallaxEffect * 0.001);
       });
+
+      // Update camera position to follow player
+      camera.moveTo(Vector2(
+        player.position.x - size.x / 2,
+        player.position.y - size.y / 2
+      ));
     }
   }
 
