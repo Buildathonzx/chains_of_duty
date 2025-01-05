@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart' hide Level;
 import 'package:provider/provider.dart';
-import 'package:flame/game.dart';
 import 'package:chains_of_duty_lib/gameplay/shooter_game.dart';
 
 import '../audio/audio_controller.dart';
