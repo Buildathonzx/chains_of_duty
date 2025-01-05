@@ -20,7 +20,8 @@ import 'win_game/win_game_screen.dart';
 
 /// The router describes the game's navigational hierarchy, from the main
 /// screen through settings screens all the way to each individual level.
-final router = GoRouter(
+final GoRouter router = GoRouter(
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',

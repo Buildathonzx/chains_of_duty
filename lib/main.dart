@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
-
 import 'app_lifecycle/app_lifecycle.dart';
 import 'audio/audio_controller.dart';
 import 'player_progress/player_progress.dart';
@@ -99,6 +98,7 @@ class MyApp extends StatelessWidget {
             ),
             routerDelegate: router.routerDelegate,
             routeInformationParser: router.routeInformationParser,
+            routeInformationProvider: router.routeInformationProvider,
           );
         }),
       ),
