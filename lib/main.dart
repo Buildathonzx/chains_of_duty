@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
         child: Builder(builder: (context) {
           final palette = context.watch<Palette>();
 
-          return MaterialApp(
+          return MaterialApp.router(
             title: 'My Flutter Game',
             theme: ThemeData.from(
               colorScheme: ColorScheme.fromSeed(
@@ -99,8 +99,8 @@ class MyApp extends StatelessWidget {
                 ),
               ),
             ),
-            home: const SplashScreen(),
-            routerConfig: router,
+            routerDelegate: router.routerDelegate,
+            routeInformationParser: router.routeInformationParser,
           );
         }),
       ),

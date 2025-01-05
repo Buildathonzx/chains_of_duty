@@ -99,7 +99,7 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                   ),
                   const Spacer(),
                   Expanded(
-                    // The actual UI of the game.
+                    // Pass the game parameter to MyGameWidget
                     child: MyGameWidget(
                       game: ShooterGame(),
                       overlayBuilderMap: {
