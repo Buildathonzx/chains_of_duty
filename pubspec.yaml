@@ -37,6 +37,10 @@ flutter:
     - assets/music/
     - assets/sfx/
     - assets/
+    - assets/images/player.png
+    - assets/images/enemy.png
+    - assets/images/weapon.png
+    # Add any other game assets here
 
   fonts:
     - family: Permanent Marker

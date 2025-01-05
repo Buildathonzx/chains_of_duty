@@ -24,3 +24,16 @@ class GameInputController with KeyboardEventListener {
 
 mixin KeyboardEventListener {
 }
+
+// Example of setting sprite in a new SpriteComponent
+class SomeNewSpriteComponent extends SpriteComponent with HasGameRef<FlameGame> {
+  // ...existing properties...
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    sprite = await gameRef.images.load('assets/images/some_new_image.png'); // Ensure correct path
+  }
+
+  // ...existing methods...
+}

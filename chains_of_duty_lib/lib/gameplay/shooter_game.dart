@@ -56,7 +56,7 @@ class PlayerSquare extends SpriteComponent with HasGameRef<FlameGame> {
   Future<void> onLoad() async {
     await super.onLoad();
     // Load the image then create a sprite:
-    final image = await gameRef.images.load('player.png');
+    final image = await gameRef.images.load('assets/images/player.png'); // Updated path
     sprite = Sprite(image);
   }
 
@@ -86,7 +86,7 @@ class EnemySquare extends SpriteComponent {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = await Sprite.load('enemy.png');
+    sprite = await Sprite.load('assets/images/enemy.png'); // Updated path
   }
 
   @override
@@ -239,7 +239,7 @@ class Weapon extends SpriteComponent with HasGameRef<FlameGame> {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = await gameRef.loadSprite('weapon.png');
+    sprite = await gameRef.loadSprite('assets/images/weapon.png'); // Updated path
   }
 
   @override
