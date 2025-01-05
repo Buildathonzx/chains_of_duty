@@ -176,7 +176,7 @@ class CityScenery extends Component {
     if (math.Random().nextDouble() < 0.001) {
       canvas.drawColor(
         Colors.white.withOpacity(0.3),
-        BlendMode.plusLighter,
+        BlendMode.plus,  // Changed from plusLighter to plus
       );
     }
 
@@ -389,7 +389,8 @@ class SnowParticle extends PositionComponent {
   }
 }
 
-class ChainLink extends PositionComponent {
+// Update ChainLink to have game reference
+class ChainLink extends PositionComponent with HasGameRef<MultiPlayerShooterGame> {
   final Paint _paint = Paint()
     ..color = Colors.amberAccent
     ..style = PaintingStyle.stroke
@@ -402,7 +403,7 @@ class ChainLink extends PositionComponent {
   @override
   void update(double dt) {
     super.update(dt);
-    swingAngle = math.sin(game!.currentTime() * 2) * 0.3;
+    swingAngle = math.sin(gameRef.currentTime * 2) * 0.3;  // Use gameRef instead of game
   }
 
   @override
