@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart' hide Level;
 import 'package:provider/provider.dart';
+import 'package:flame/game.dart';
 
 import '../audio/audio_controller.dart';
 import '../audio/sounds.dart';
@@ -41,6 +42,8 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
   static const _preCelebrationDuration = Duration(milliseconds: 500);
 
   bool _duringCelebration = false;
+
+  bool _paused = false;
 
   late DateTime _startOfPlay;
 
@@ -94,9 +97,20 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                     ),
                   ),
                   const Spacer(),
-                  const Expanded(
+                  Expanded(
                     // The actual UI of the game.
-                    child: GameWidget(),
+                    child: GameWidget(
+                      game: ShooterGame(),
+                      overlayBuilderMap: {
+                        'PauseMenu': (ctx, game) => _paused
+                            ? Container(
+                                color: Colors.black54,
+                                alignment: Alignment.center,
+                                child: const Text('Paused', style: TextStyle(color: Colors.white, fontSize: 30)),
+                              )
+                            : const SizedBox.shrink(),
+                      },
+                    ),
                   ),
                   const Spacer(),
                   Padding(
@@ -109,6 +123,10 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                 ],
               ),
             ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => setState(() => _paused = !_paused),
+            child: Icon(_paused ? Icons.play_arrow : Icons.pause),
           ),
         ),
       ),

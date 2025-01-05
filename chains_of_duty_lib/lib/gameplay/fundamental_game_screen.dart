@@ -1,3 +1,4 @@
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:chains_of_duty_lib/gameplay/shooter_game.dart';
 
@@ -14,16 +15,20 @@ class _FundamentalGameScreenState extends State<FundamentalGameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          const ShooterGame(),
-          Positioned(
-            top: 50,
-            left: 20,
-            child: Text('Score: $_score',
-                style: const TextStyle(color: Colors.white, fontSize: 20)),
-          ),
-        ],
+      body: GameWidget(
+        game: ShooterGame(),
+        overlayBuilderMap: {
+          'ScoreOverlay': (context, game) {
+            return Positioned(
+              top: 50,
+              left: 20,
+              child: Text(
+                'Score: $_score',
+                style: const TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            );
+          },
+        },
       ),
     );
   }
