@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flame/collisions.dart';  // Add this import
 import 'package:flutter/material.dart';
 import 'package:chains_of_duty_lib/style/characters.dart';
 import 'package:flame/input.dart';
@@ -428,7 +429,7 @@ extension on CameraComponent {
 }
 
 // New ParkourPlayer class
-class ParkourPlayer extends SpriteComponent with HasGameRef<MultiPlayerShooterGame>, CollisionCallbacks {
+class ParkourPlayer extends SpriteComponent with HasGameRef<FlameGame> {
   static const double JUMP_VELOCITY = -400.0;
   static const double MOVE_SPEED = 200.0;
   
@@ -445,6 +446,8 @@ class ParkourPlayer extends SpriteComponent with HasGameRef<MultiPlayerShooterGa
   Future<void> onLoad() async {
     // Yellow character
     paint = Paint()..color = Colors.amber;
+    // Add hitbox for collisions
+    add(RectangleHitbox());
   }
 
   @override
@@ -457,8 +460,8 @@ class ParkourPlayer extends SpriteComponent with HasGameRef<MultiPlayerShooterGa
       position += velocity * dt;
       
       // Basic platform collision
-      for (final platform in gameRef.platforms) {
-        if (collidesWith(platform)) {
+      for (final platform in parent!.children.whereType<Platform>()) {
+        if (_checkCollision(platform)) {
           if (velocity.y > 0) {
             position.y = platform.position.y - size.y / 2;
             velocity.y = 0;
@@ -476,10 +479,17 @@ class ParkourPlayer extends SpriteComponent with HasGameRef<MultiPlayerShooterGa
       velocity = toPlayer.scaled(300);
     }
   }
+
+  bool _checkCollision(Platform platform) {
+    return position.y + size.y/2 > platform.position.y &&
+           position.y - size.y/2 < platform.position.y + platform.size.y &&
+           position.x + size.x/2 > platform.position.x &&
+           position.x - size.x/2 < platform.position.x + platform.size.x;
+  }
 }
 
 // New Villain class
-class Villain extends SpriteComponent with HasGameRef<MultiPlayerShooterGame> {
+class Villain extends SpriteComponent with HasGameRef<FlameGame> {
   Vector2 velocity = Vector2.zero();
   List<Vector2> pathPoints = [];
   int currentPathIndex = 0;
