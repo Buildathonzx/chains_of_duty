@@ -330,10 +330,7 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
     );
     
     // Make the camera follow the player without worldBounds
-    camera.followComponent(
-      player,
-      // Removed 'worldBounds' as it's not a valid parameter in Flame 1.23.0
-    );
+    camera.follow(player);
   }
 
   @override
@@ -351,6 +348,12 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
       children.whereType<ChainLink>().forEach((chain) {
         chain.swingAngle = math.sin(gameTime * 0.002) * 0.3 + (parallaxEffect * 0.001);
       });
+
+      // Clamp camera position within world bounds
+      camera.position.clamp(
+        Vector2(0, 0),
+        Vector2(2000, 2000),
+      );
 
       // Remove manual camera positioning
       // camera.moveTo(Vector2(
