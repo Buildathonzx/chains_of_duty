@@ -98,6 +98,66 @@ class ShooterGame extends FlameGame {
   }
 }
 
+class CityScenery extends Component with HasPaint {
+  @override
+  void render(Canvas canvas) {
+    // Draw roads, buildings, etc. as needed
+    // e.g., simple rectangles for buildings
+    paint.color = const Color(0xFFCCCCCC);
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 800, 800), paint);
+  }
+}
+
+class OpponentSquare extends SpriteComponent {
+  static const _speed = 120.0;
+  final Vector2 direction;
+
+  OpponentSquare({
+    required Vector2 position,
+    required this.direction,
+  }) : super(position: position, size: Vector2.all(64), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    sprite = await Sprite.load('player.png');
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    // Draw red tag at center
+    final center = size / 4;
+    canvas.drawCircle(Offset(center.x, center.y), 5, Paint()..color = Colors.red);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    position += direction * _speed * dt;
+  }
+}
+
+class MultiPlayerShooterGame extends FlameGame {
+  @override
+  Future<void> onLoad() async {
+    final city = CityScenery();
+    add(city);
+
+    // Add multiple players
+    add(PlayerSquare(Vector2(100, 100)));
+    add(PlayerSquare(Vector2(300, 300)));
+
+    // Add some opponents
+    add(OpponentSquare(
+      position: Vector2(500, 400),
+      direction: Vector2(-1, 0),
+    ));
+
+    camera.zoom = 1.0;
+  }
+}
+
 extension on CameraComponent {
   set zoom(double zoom) {}
 }

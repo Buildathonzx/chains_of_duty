@@ -75,54 +75,17 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
         ignoring: _duringCelebration,
         child: Scaffold(
           backgroundColor: palette.backgroundPlaySession,
-          // The stack is how you layer widgets on top of each other.
-          // Here, it is used to overlay the winning confetti animation on top
-          // of the game.
-          body: Stack(
-            children: [
-              // This is the main layout of the play session screen,
-              // with a settings button on top, the actual play area
-              // in the middle, and a back button at the bottom.
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: InkResponse(
-                      onTap: () => GoRouter.of(context).push('/settings'),
-                      child: Image.asset(
-                        'assets/images/settings.png',
-                        semanticLabel: 'Settings',
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Expanded(
-                    // Pass the game parameter to MyGameWidget
-                    child: MyGameWidget(
-                      game: ShooterGame(),
-                      overlayBuilderMap: {
-                        'PauseMenu': (ctx, game) => _paused
-                            ? Container(
-                                color: Colors.black54,
-                                alignment: Alignment.center,
-                                child: const Text('Paused', style: TextStyle(color: Colors.white, fontSize: 30)),
-                              )
-                            : const SizedBox.shrink(),
-                      },
-                    ),
-                  ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: MyButton(
-                      onPressed: () => GoRouter.of(context).go('/play'),
-                      child: const Text('Back'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          body: MyGameWidget(
+            game: MultiPlayerShooterGame(),
+            overlayBuilderMap: {
+              'PauseMenu': (ctx, game) => _paused
+                  ? Container(
+                      color: Colors.black54,
+                      alignment: Alignment.center,
+                      child: const Text('Paused', style: TextStyle(color: Colors.white, fontSize: 30)),
+                    )
+                  : const SizedBox.shrink(),
+            },
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => setState(() => _paused = !_paused),
