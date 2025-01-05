@@ -58,6 +58,10 @@ class ShooterGame extends FlameGame {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    camera.setRelativeZoom(1.0);
+    camera.zoom = 1.0;
   }
+}
+
+extension on CameraComponent {
+  set zoom(double zoom) {}
 }
