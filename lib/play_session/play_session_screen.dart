@@ -75,16 +75,23 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
         ignoring: _duringCelebration,
         child: Scaffold(
           backgroundColor: palette.backgroundPlaySession,
-          body: MyGameWidget(
-            game: MultiPlayerShooterGame(),
-            overlayBuilderMap: {
-              'PauseMenu': (ctx, game) => _paused
-                  ? Container(
-                      color: Colors.black54,
-                      alignment: Alignment.center,
-                      child: const Text('Paused', style: TextStyle(color: Colors.white, fontSize: 30)),
-                    )
-                  : const SizedBox.shrink(),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox.expand(
+                child: GameWidget(
+                  game: MultiPlayerShooterGame(),
+                  overlayBuilderMap: {
+                    'PauseMenu': (ctx, game) => _paused
+                        ? Container(
+                            color: Colors.black54,
+                            alignment: Alignment.center,
+                            child: const Text('Paused', style: TextStyle(color: Colors.white, fontSize: 30)),
+                          )
+                        : const SizedBox.shrink(),
+                  },
+                  fullscreen: true,
+                ),
+              );
             },
           ),
           floatingActionButton: FloatingActionButton(

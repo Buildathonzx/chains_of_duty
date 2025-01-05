@@ -29,9 +29,15 @@ class Palette {
   Color get inkFullOpacity => const Color(0xff352b42);
   Color get ink => const Color(0xee352b42);
   Color get backgroundMain => const Color(0xffffffd1);
-  Color get backgroundLevelSelection => const Color(0xffa2dcc7);
-  Color get backgroundPlaySession => const Color(0xffffebb5);
+  Color get backgroundLevelSelection => Colors.blueGrey;
+  Color get backgroundPlaySession => Colors.black;
   Color get background4 => const Color(0xffffd7ff);
-  Color get backgroundSettings => const Color(0xffbfc8e3);
+  Color get backgroundSettings => Colors.grey[900]!;
   Color get trueWhite => const Color(0xffffffff);
+
+  // Additional colors for city scenery
+  Color get buildingColor => Colors.grey;
+  Color get roadColor => Colors.black54;
+  Color get playerColor => Colors.blue;
+  Color get opponentColor => Colors.red;
 }

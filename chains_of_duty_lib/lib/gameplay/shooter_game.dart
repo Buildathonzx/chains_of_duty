@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:chains_of_duty_lib/style/characters.dart';
+import 'package:flame/input.dart';
 
 class ShooterWorld extends World with TapCallbacks {
   final _random = math.Random();
@@ -36,8 +37,10 @@ class ShooterWorld extends World with TapCallbacks {
   }
 }
 
-class PlayerSquare extends SpriteComponent with TapCallbacks {
-  static const _speed = 2.0;
+// Updated PlayerSquare with Weapon
+class PlayerSquare extends SpriteComponent with HasGameRef<MultiPlayerShooterGame>, PanDetector {
+  static const _speed = 150.0;
+  Vector2 velocity = Vector2.zero();
 
   PlayerSquare(Vector2 position)
       : super(
@@ -49,14 +52,26 @@ class PlayerSquare extends SpriteComponent with TapCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = await Sprite.load('player.png');
+    sprite = await gameRef.loadSprite('player.png');
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    angle += _speed * dt;
-    angle %= 2 * math.pi;
+    position += velocity * dt;
+    // Keep player within screen bounds
+    position.clamp(Vector2.zero() + size / 2, gameRef.size - size / 2);
+  }
+
+  @override
+  bool onPanUpdate(DragUpdateInfo info) {
+    velocity = info.delta.global / info.delta.game;
+    return super.onPanUpdate(info);
+  }
+
+  void fireWeapon() {
+    final weaponPosition = position + Vector2(0, -size.y / 2);
+    gameRef.add(Weapon(weaponPosition, Vector2(0, -1)));
   }
 
   @override
@@ -98,63 +113,161 @@ class ShooterGame extends FlameGame {
   }
 }
 
-class CityScenery extends Component with HasPaint {
+// CityScenery Component
+class CityScenery extends Component {
   @override
   void render(Canvas canvas) {
-    // Draw roads, buildings, etc. as needed
-    // e.g., simple rectangles for buildings
-    paint.color = const Color(0xFFCCCCCC);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, 800, 800), paint);
+    final paint = Paint()..color = Colors.grey;
+    // Draw buildings
+    for (int i = 0; i < 10; i++) {
+      canvas.drawRect(Rect.fromLTWH(i * 80.0, 300, 60, 200), paint);
+    }
+    // Draw roads
+    paint.color = Colors.grey[800]!;
+    canvas.drawRect(Rect.fromLTWH(0, 500, 800, 100), paint);
+  }
+
+  @override
+  void update(double dt) {
+    // Static scenery; no updates needed
   }
 }
 
-class OpponentSquare extends SpriteComponent {
-  static const _speed = 120.0;
+// Weapon Component
+class Weapon extends SpriteComponent with HasGameRef<MultiPlayerShooterGame> {
+  final Vector2 direction;
+
+  Weapon(Vector2 position, this.direction)
+      : super(
+          position: position,
+          size: Vector2(20, 10),
+          anchor: Anchor.center,
+        );
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    sprite = await gameRef.loadSprite('weapon.png');
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    position += direction * 300 * dt;
+    // Remove weapon if out of bounds
+    if (position.x < 0 || position.x > gameRef.size.x || position.y < 0 || position.y > gameRef.size.y) {
+      removeFromParent();
+    }
+  }
+}
+
+// OpponentSquare with Red Tag
+class OpponentSquare extends SpriteComponent with HasGameRef<MultiPlayerShooterGame> {
+  static const _speed = 100.0;
   final Vector2 direction;
 
   OpponentSquare({
     required Vector2 position,
     required this.direction,
-  }) : super(position: position, size: Vector2.all(64), anchor: Anchor.center);
+  }) : super(
+          position: position,
+          size: Vector2.all(64),
+          anchor: Anchor.center,
+        );
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = await Sprite.load('player.png');
+    sprite = await gameRef.loadSprite('enemy.png');
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
     // Draw red tag at center
-    final center = size / 4;
-    canvas.drawCircle(Offset(center.x, center.y), 5, Paint()..color = Colors.red);
+    final paint = Paint()..color = Colors.red;
+    canvas.drawCircle(Offset(size.x / 2, size.y / 2), 5, paint);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
     position += direction * _speed * dt;
+    // Remove opponent if out of bounds
+    if (position.x < 0 || position.x > gameRef.size.x || position.y < 0 || position.y > gameRef.size.y) {
+      removeFromParent();
+    }
   }
 }
 
-class MultiPlayerShooterGame extends FlameGame {
+// Enhanced MultiPlayerShooterGame
+class MultiPlayerShooterGame extends FlameGame with HasTappables, HasDraggables {
+  late PlayerSquare player1;
+  late PlayerSquare player2;
+
   @override
   Future<void> onLoad() async {
-    final city = CityScenery();
-    add(city);
+    await super.onLoad();
+    add(CityScenery());
 
-    // Add multiple players
-    add(PlayerSquare(Vector2(100, 100)));
-    add(PlayerSquare(Vector2(300, 300)));
+    // Initialize players
+    player1 = PlayerSquare(Vector2(100, 400));
+    player2 = PlayerSquare(Vector2(700, 400));
+    addAll([player1, player2]);
 
-    // Add some opponents
-    add(OpponentSquare(
-      position: Vector2(500, 400),
-      direction: Vector2(-1, 0),
-    ));
+    // Initialize opponents
+    spawnOpponent();
 
-    camera.zoom = 1.0;
+    // Add input handling for firing
+    add(FiringDetector(player1));
+    add(FiringDetector(player2));
+
+    camera.viewport = FixedResolutionViewport(Vector2(800, 600));
+  }
+
+  void spawnOpponent() {
+    final random = math.Random();
+    final position = Vector2(random.nextDouble() * size.x, random.nextDouble() * size.y / 2);
+    final direction = Vector2(random.nextDouble() - 0.5, 1).normalized();
+    add(OpponentSquare(position: position, direction: direction));
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    // Spawn opponents periodically
+    if (math.Random().nextDouble() < 0.005) {
+      spawnOpponent();
+    }
+
+    // Collision detection for weapons and opponents
+    children.whereType<Weapon>().forEach((weapon) {
+      children.whereType<OpponentSquare>().forEach((opponent) {
+        if (weapon.toRect().overlaps(opponent.toRect())) {
+          opponent.removeFromParent();
+          weapon.removeFromParent();
+          // Optionally add score or effects here
+        }
+      });
+    });
+  }
+}
+
+// FiringDetector for handling weapon firing
+class FiringDetector extends Component with TapDetector {
+  final PlayerSquare player;
+
+  FiringDetector(this.player);
+
+  @override
+  void onTap() {
+    player.fireWeapon();
+  }
+}
+
+extension on MultiPlayerShooterGame {
+  Future<Sprite> loadSprite(String assetName) async {
+    return await images.load(assetName);
   }
 }
 

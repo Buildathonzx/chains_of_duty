@@ -16,13 +16,21 @@ import '../level_selection/levels.dart';
 /// button or the back button.
 class MyGameWidget extends StatelessWidget {
   final flame.Game game;
+  final Map<String, Widget Function(BuildContext, flame.Game)> overlayBuilderMap;
 
-  const MyGameWidget({required this.game, super.key, required Map<String, Widget Function(dynamic ctx, dynamic game)> overlayBuilderMap});
+  const MyGameWidget({
+    required this.game,
+    required this.overlayBuilderMap,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return flame.GameWidget(
       game: game,
+      overlayBuilderMap: overlayBuilderMap,
+      // Ensure the game takes the full screen
+      fullscreen: true,
     );
   }
 }
