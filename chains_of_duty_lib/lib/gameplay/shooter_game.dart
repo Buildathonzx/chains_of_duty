@@ -102,23 +102,122 @@ class ShooterGame extends FlameGame {
   }
 }
 
-// CityScenery Component
+// Enhanced CityScenery with vibrant colors and parallax effect
 class CityScenery extends Component {
-  @override
-  void render(Canvas canvas) {
-    final paint = Paint()..color = Colors.grey;
-    // Draw buildings
-    for (int i = 0; i < 10; i++) {
-      canvas.drawRect(Rect.fromLTWH(i * 80.0, 300, 60, 200), paint);
+  final List<Rect> _buildings = [];
+  final List<Color> _buildingColors = [];
+  late List<List<Rect>> _parallaxLayers;
+  late List<Color> _skyColors;
+  double _time = 0;
+
+  CityScenery() {
+    _initializeScenery();
+  }
+
+  void _initializeScenery() {
+    // Create vibrant sky gradient
+    _skyColors = [
+      const Color(0xFF1a2a6c),
+      const Color(0xFF4b2891),
+      const Color(0xFFb21f1f),
+      const Color(0xFFfdbb2d),
+    ];
+
+    // Generate random buildings with varied heights and colors
+    final random = math.Random();
+    for (int i = 0; i < 20; i++) {
+      final height = 100.0 + random.nextDouble() * 300;
+      _buildings.add(Rect.fromLTWH(
+        i * 60.0,
+        600 - height,
+        50,
+        height,
+      ));
+      _buildingColors.add(Color.fromARGB(
+        255,
+        150 + random.nextInt(105),
+        150 + random.nextInt(105),
+        200 + random.nextInt(55),
+      ));
     }
-    // Draw roads
-    paint.color = Colors.grey[800]!;
-    canvas.drawRect(Rect.fromLTWH(0, 500, 800, 100), paint);
+
+    // Create parallax layers
+    _parallaxLayers = List.generate(3, (index) {
+      return List.generate(5, (i) {
+        return Rect.fromLTWH(
+          i * 200.0,
+          400 + (index * 100),
+          180,
+          200 - (index * 50),
+        );
+      });
+    });
   }
 
   @override
   void update(double dt) {
-    // Static scenery; no updates needed
+    _time += dt;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    // Draw sky gradient
+    final Rect skyRect = Rect.fromLTWH(0, 0, 800, 600);
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: _skyColors,
+        stops: [0.0, 0.3, 0.6, 1.0],
+      ).createShader(skyRect);
+    canvas.drawRect(skyRect, paint);
+
+    // Draw thunder effect occasionally
+    if (math.Random().nextDouble() < 0.001) {
+      canvas.drawColor(
+        Colors.white.withOpacity(0.3),
+        BlendMode.plusLighter,
+      );
+    }
+
+    // Draw parallax city layers
+    for (int layer = 0; layer < _parallaxLayers.length; layer++) {
+      final layerOffset = math.sin(_time * (1 + layer * 0.5)) * (10 - layer * 3);
+      for (final rect in _parallaxLayers[layer]) {
+        canvas.drawRect(
+          rect.translate(layerOffset, 0),
+          Paint()
+            ..color = Colors.blue[900 - (layer * 200)]!.withOpacity(0.5),
+        );
+      }
+    }
+
+    // Draw buildings with neon effect
+    for (int i = 0; i < _buildings.length; i++) {
+      final buildingPaint = Paint()
+        ..color = _buildingColors[i]
+        ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 3);
+      
+      canvas.drawRect(_buildings[i], buildingPaint);
+      
+      // Draw windows
+      final windowPaint = Paint()..color = Colors.yellow.withOpacity(0.8);
+      for (int y = 0; y < 10; y++) {
+        for (int x = 0; x < 3; x++) {
+          if (math.Random().nextDouble() < 0.7) {
+            canvas.drawRect(
+              Rect.fromLTWH(
+                _buildings[i].left + 10 + (x * 15),
+                _buildings[i].top + 10 + (y * 30),
+                10,
+                20,
+              ),
+              windowPaint,
+            );
+          }
+        }
+      }
+    }
   }
 }
 
@@ -199,6 +298,16 @@ class MultiPlayerShooterGame extends FlameGame {
     await super.onLoad();
     add(CityScenery());
 
+    // Add snow particles
+    for (int i = 0; i < 100; i++) {
+      add(SnowParticle());
+    }
+
+    // Add chains for movement
+    for (int i = 0; i < 5; i++) {
+      add(ChainLink(Vector2(150 + i * 200, 0)));
+    }
+
     // Initialize players
     player1 = PlayerSquare(Vector2(100, 400));
     player2 = PlayerSquare(Vector2(700, 400));
@@ -247,6 +356,70 @@ class FiringDetector extends Component {
   FiringDetector(this.player);
   // Remove 'with TapDetector' for Flame 1.x, or detect taps in the game class
   // so you can call player.fireWeapon() there.
+}
+
+// Add new components for visual effects
+class SnowParticle extends PositionComponent {
+  final Paint _paint = Paint()..color = Colors.white.withOpacity(0.8);
+  double _speed = 0;
+  
+  SnowParticle() : super(size: Vector2(3, 3)) {
+    _speed = (math.Random().nextDouble() * 50) + 30;
+    position = Vector2(
+      math.Random().nextDouble() * 800,
+      -10,
+    );
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    position.y += _speed * dt;
+    position.x += math.sin(position.y / 30) * 2 * dt;
+    
+    if (position.y > 800) {
+      position.y = -10;
+      position.x = math.Random().nextDouble() * 800;
+    }
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawCircle(Offset(size.x / 2, size.y / 2), 2, _paint);
+  }
+}
+
+class ChainLink extends PositionComponent {
+  final Paint _paint = Paint()
+    ..color = Colors.amberAccent
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 3;
+  
+  double swingAngle = 0;
+  
+  ChainLink(Vector2 position) : super(position: position, size: Vector2(30, 200));
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    swingAngle = math.sin(game!.currentTime() * 2) * 0.3;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.save();
+    canvas.translate(size.x / 2, 0);
+    canvas.rotate(swingAngle);
+    
+    for (int i = 0; i < 10; i++) {
+      canvas.drawOval(
+        Rect.fromLTWH(-8, i * 20, 16, 20),
+        _paint,
+      );
+    }
+    
+    canvas.restore();
+  }
 }
 
 extension on CameraComponent {
