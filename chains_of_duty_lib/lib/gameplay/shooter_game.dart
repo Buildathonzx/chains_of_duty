@@ -102,7 +102,7 @@ class ShooterGame extends FlameGame {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    camera.zoom = 1.0;
+    // camera.zoom = 1.0; // Removed the invalid zoom setter
   }
 }
 
@@ -329,10 +329,10 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
       resolution: Vector2(800, 600),
     );
     
-    // Make the camera follow the player
-    camera.follow(
+    // Make the camera follow the player without worldBounds
+    camera.followComponent(
       player,
-      worldBounds: Rect.fromLTWH(0, 0, 2000, 2000), // Adjust world bounds as needed
+      // Removed 'worldBounds' as it's not a valid parameter in Flame 1.23.0
     );
   }
 
