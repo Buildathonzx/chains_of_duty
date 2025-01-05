@@ -350,7 +350,7 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
       });
 
       // Clamp camera position within world bounds
-      camera.position.clamp(
+      camera.viewfinder.position.clamp(
         Vector2(0, 0),
         Vector2(2000, 2000),
       );
