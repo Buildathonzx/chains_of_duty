@@ -114,6 +114,9 @@ class CityScenery extends Component {
   late List<Color> _skyColors;
   double _time = 0;
 
+  // Added scroll speed for buildings
+  final double _buildingsScrollSpeed = 50.0; // pixels per second
+
   CityScenery() {
     _initializeScenery();
   }
@@ -161,6 +164,36 @@ class CityScenery extends Component {
   @override
   void update(double dt) {
     _time += dt;
+
+    // Move buildings leftward
+    for (int i = 0; i < _buildings.length; i++) {
+      _buildings[i] = _buildings[i].translate(-_buildingsScrollSpeed * dt, 0);
+      // Reset position if building moves out of screen
+      if (_buildings[i].right < 0) {
+        _buildings[i] = Rect.fromLTWH(
+          800, // Assuming screen width is 800
+          _buildings[i].top,
+          _buildings[i].width,
+          _buildings[i].height,
+        );
+      }
+    }
+
+    // Move parallax layers leftward
+    for (int layer = 0; layer < _parallaxLayers.length; layer++) {
+      for (int i = 0; i < _parallaxLayers[layer].length; i++) {
+        _parallaxLayers[layer][i] = _parallaxLayers[layer][i].translate(-_buildingsScrollSpeed * dt * (layer + 1) * 0.5, 0);
+        // Reset position if layer moves out of screen
+        if (_parallaxLayers[layer][i].right < 0) {
+          _parallaxLayers[layer][i] = Rect.fromLTWH(
+            800, // Assuming screen width is 800
+            _parallaxLayers[layer][i].top,
+            _parallaxLayers[layer][i].width,
+            _parallaxLayers[layer][i].height,
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -184,19 +217,18 @@ class CityScenery extends Component {
       );
     }
 
-    // Draw parallax city layers
+    // Draw parallax city layers with movement
     for (int layer = 0; layer < _parallaxLayers.length; layer++) {
-      final layerOffset = math.sin(_time * (1 + layer * 0.5)) * (10 - layer * 3);
       for (final rect in _parallaxLayers[layer]) {
         canvas.drawRect(
-          rect.translate(layerOffset, 0),
+          rect,
           Paint()
             ..color = Colors.blue[900 - (layer * 200)]!.withOpacity(0.5),
         );
       }
     }
 
-    // Draw buildings with neon effect
+    // Draw buildings with neon effect and movement
     for (int i = 0; i < _buildings.length; i++) {
       final buildingPaint = Paint()
         ..color = _buildingColors[i]
@@ -270,7 +302,7 @@ class OpponentSquare extends SpriteComponent with HasGameRef<FlameGame> {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = await gameRef.loadSprite('enemy.png');
+    sprite = await gameRef.images.load('assets/images/enemy.png'); // Corrected path
   }
 
   @override
@@ -529,13 +561,15 @@ class ChainLink extends PositionComponent with HasGameRef<FlameGame> {
     ..strokeWidth = 3;
   
   double swingAngle = 0;
+  double _time = 0; // Added time tracking
   
   ChainLink(Vector2 position) : super(position: position, size: Vector2(30, 200));
 
   @override
   void update(double dt) {
     super.update(dt);
-    swingAngle = math.sin(gameRef.currentTime() * 2) * 0.3;  // Use gameRef instead of game
+    _time += dt;
+    swingAngle = math.sin(_time * 2) * 0.3; // Updated swing calculation
   }
 
   @override
