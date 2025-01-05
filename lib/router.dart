@@ -115,5 +115,9 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
+    ),
   ],
 );
