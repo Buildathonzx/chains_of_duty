@@ -426,3 +426,278 @@ class ChainLink extends PositionComponent with HasGameRef<MultiPlayerShooterGame
 extension on CameraComponent {
   set zoom(double zoom) {}
 }
+
+// New ParkourPlayer class
+class ParkourPlayer extends SpriteComponent with HasGameRef<MultiPlayerShooterGame>, CollisionCallbacks {
+  static const double JUMP_VELOCITY = -400.0;
+  static const double MOVE_SPEED = 200.0;
+  
+  Vector2 velocity = Vector2.zero();
+  bool isOnGround = false;
+  bool isSwinging = false;
+  ChainLink? attachedChain;
+
+  ParkourPlayer() : super(size: Vector2(50, 80)) {
+    anchor = Anchor.center;
+  }
+
+  @override
+  Future<void> onLoad() async {
+    // Yellow character
+    paint = Paint()..color = Colors.amber;
+  }
+
+  @override
+  void update(double dt) {
+    if (!isSwinging) {
+      // Apply gravity
+      velocity.y += 800 * dt;
+      
+      // Move
+      position += velocity * dt;
+      
+      // Basic platform collision
+      for (final platform in gameRef.platforms) {
+        if (collidesWith(platform)) {
+          if (velocity.y > 0) {
+            position.y = platform.position.y - size.y / 2;
+            velocity.y = 0;
+            isOnGround = true;
+          }
+        }
+      }
+    } else if (attachedChain != null) {
+      // Swing physics
+      final chainCenter = attachedChain!.position + Vector2(0, attachedChain!.size.y / 2);
+      final toPlayer = position - chainCenter;
+      toPlayer.normalize();
+      
+      position = chainCenter + toPlayer * 200;
+      velocity = toPlayer.scaled(300);
+    }
+  }
+}
+
+// New Villain class
+class Villain extends SpriteComponent with HasGameRef<MultiPlayerShooterGame> {
+  Vector2 velocity = Vector2.zero();
+  List<Vector2> pathPoints = [];
+  int currentPathIndex = 0;
+  int level;
+
+  Villain(this.level) : super(size: Vector2(50, 80)) {
+    anchor = Anchor.center;
+  }
+
+  @override
+  Future<void> onLoad() async {
+    paint = Paint()..color = Colors.red;
+    // Add more complex behavior based on level
+    switch (level) {
+      case 1:
+        _setupBasicPath();
+        break;
+      case 2:
+        _setupAdvancedPath();
+        break;
+      default:
+        _setupRandomPath();
+    }
+  }
+
+  void _setupBasicPath() {
+    // Simple left-right movement
+    pathPoints = [
+      Vector2(100, 300),
+      Vector2(700, 300),
+    ];
+  }
+
+  void _setupAdvancedPath() {
+    // More complex movement pattern
+    pathPoints = [
+      Vector2(100, 300),
+      Vector2(400, 200),
+      Vector2(700, 300),
+      Vector2(400, 400),
+    ];
+  }
+
+  void _setupRandomPath() {
+    // Random movement pattern
+    final random = math.Random();
+    pathPoints = List.generate(5, (i) {
+      return Vector2(
+        random.nextDouble() * 700 + 50,
+        random.nextDouble() * 300 + 100,
+      );
+    });
+  }
+
+  @override
+  void update(double dt) {
+    // Move towards current path point
+    final target = pathPoints[currentPathIndex];
+    final toTarget = target - position;
+    
+    if (toTarget.length < 10) {
+      currentPathIndex = (currentPathIndex + 1) % pathPoints.length;
+    } else {
+      position += toTarget.normalized() * 150 * dt;
+    }
+
+    // Add level-specific behavior
+    switch (level) {
+      case 2:
+        _throwObstacle();
+        break;
+      case 3:
+        _teleportRandomly();
+        break;
+    }
+  }
+
+  void _throwObstacle() {
+    if (math.Random().nextDouble() < 0.02) {
+      gameRef.add(Obstacle(position.clone()));
+    }
+  }
+
+  void _teleportRandomly() {
+    if (math.Random().nextDouble() < 0.01) {
+      position = Vector2(
+        math.Random().nextDouble() * 700 + 50,
+        math.Random().nextDouble() * 300 + 100,
+      );
+    }
+  }
+}
+
+// New Platform class
+class Platform extends PositionComponent {
+  Platform(Vector2 position, Vector2 size) : super(position: position, size: size);
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      Paint()..color = Colors.grey[800]!,
+    );
+  }
+}
+
+// New Obstacle class
+class Obstacle extends PositionComponent {
+  Vector2 velocity;
+  
+  Obstacle(Vector2 position) 
+      : velocity = Vector2(math.Random().nextDouble() * 200 - 100, -200),
+        super(position: position, size: Vector2(20, 20));
+
+  @override
+  void update(double dt) {
+    velocity.y += 400 * dt;  // Gravity
+    position += velocity * dt;
+    
+    if (position.y > 800) removeFromParent();
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawCircle(
+      Offset(size.x / 2, size.y / 2),
+      10,
+      Paint()..color = Colors.redAccent,
+    );
+  }
+}
+
+// Enhanced MultiPlayerShooterGame with new mechanics
+class MultiPlayerShooterGame extends FlameGame with HasCollisionDetection {
+  late ParkourPlayer player;
+  late Villain villain;
+  final List<Platform> platforms = [];
+  int currentLevel = 1;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    
+    // Add enhanced city scenery
+    add(CityScenery());
+
+    // Add platforms with varying heights
+    _generatePlatforms();
+
+    // Add chains for swinging
+    _addSwingingChains();
+
+    // Add player and villain
+    player = ParkourPlayer()..position = Vector2(100, 500);
+    villain = Villain(currentLevel)..position = Vector2(700, 300);
+    
+    addAll([player, villain]);
+
+    // Add visual effects
+    add(WeatherSystem());
+  }
+
+  void _generatePlatforms() {
+    // Generate platforms of varying heights and sizes
+    final random = math.Random();
+    
+    for (int i = 0; i < 10; i++) {
+      final platform = Platform(
+        Vector2(i * 100.0, 300 + random.nextDouble() * 200),
+        Vector2(80, 20),
+      );
+      platforms.add(platform);
+      add(platform);
+    }
+
+    // Add some floating platforms
+    for (int i = 0; i < 5; i++) {
+      final platform = Platform(
+        Vector2(random.nextDouble() * 700, 200 + random.nextDouble() * 200),
+        Vector2(60, 15),
+      );
+      platforms.add(platform);
+      add(platform);
+    }
+  }
+
+  void _addSwingingChains() {
+    for (int i = 0; i < 5; i++) {
+      add(ChainLink(Vector2(150 + i * 200, 0)));
+    }
+  }
+
+  void nextLevel() {
+    currentLevel++;
+    // Remove existing villain
+    villain.removeFromParent();
+    // Add new villain with increased difficulty
+    villain = Villain(currentLevel)..position = Vector2(700, 300);
+    add(villain);
+    // Regenerate platforms in new configuration
+    _regeneratePlatforms();
+  }
+
+  void _regeneratePlatforms() {
+    // Remove existing platforms
+    for (final platform in platforms) {
+      platform.removeFromParent();
+    }
+    platforms.clear();
+    // Generate new platforms
+    _generatePlatforms();
+  }
+}
+
+// New WeatherSystem class
+class WeatherSystem extends Component {
+  @override
+  void update(double dt) {
+    // Add weather effects based on game progress
+  }
+}
