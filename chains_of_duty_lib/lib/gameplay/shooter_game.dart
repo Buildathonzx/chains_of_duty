@@ -5,6 +5,7 @@ import 'package:flame/events.dart';
 import 'package:flame/collisions.dart';  // Add this import
 import 'package:flutter/material.dart';
 import 'package:flame/camera.dart';  // Add this import
+import 'package:flame/extensions.dart';
 import 'package:chains_of_duty_lib/style/characters.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/services.dart';  // Add this import
@@ -354,7 +355,7 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
 
   @override
   KeyEventResult onKeyEvent(
-    RawKeyEvent event,
+    KeyEvent event,
     Set<LogicalKeyboardKey> keysPressed,
   ) {
     if (!isPaused) {
