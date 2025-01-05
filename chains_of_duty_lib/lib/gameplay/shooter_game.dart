@@ -38,7 +38,7 @@ class ShooterWorld extends World {
 }
 
 // Updated PlayerSquare with Weapon
-class PlayerSquare extends SpriteComponent with HasGameRef<MultiPlayerShooterGame> {
+class PlayerSquare extends SpriteComponent with HasGameRef<FlameGame> {
   static const _speed = 150.0;
   Vector2 velocity = Vector2.zero();
 
@@ -223,7 +223,7 @@ class CityScenery extends Component {
 }
 
 // Weapon Component
-class Weapon extends SpriteComponent with HasGameRef<MultiPlayerShooterGame> {
+class Weapon extends SpriteComponent with HasGameRef<FlameGame> {
   final Vector2 direction;
 
   Weapon(Vector2 position, this.direction)
@@ -251,7 +251,7 @@ class Weapon extends SpriteComponent with HasGameRef<MultiPlayerShooterGame> {
 }
 
 // OpponentSquare with Red Tag
-class OpponentSquare extends SpriteComponent with HasGameRef<MultiPlayerShooterGame> {
+class OpponentSquare extends SpriteComponent with HasGameRef<FlameGame> {
   static const _speed = 100.0;
   final Vector2 direction;
 
@@ -290,63 +290,84 @@ class OpponentSquare extends SpriteComponent with HasGameRef<MultiPlayerShooterG
 }
 
 // Enhanced MultiPlayerShooterGame
-class MultiPlayerShooterGame extends FlameGame {
-  late PlayerSquare player1;
-  late PlayerSquare player2;
+class MultiPlayerShooterGame extends FlameGame with HasCollisionDetection {
+  late ParkourPlayer player;
+  late Villain villain;
+  final List<Platform> platforms = [];
+  int currentLevel = 1;
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    
+    // Add enhanced city scenery
     add(CityScenery());
 
-    // Add snow particles
-    for (int i = 0; i < 100; i++) {
-      add(SnowParticle());
+    // Add platforms with varying heights
+    _generatePlatforms();
+
+    // Add chains for swinging
+    _addSwingingChains();
+
+    // Add player and villain
+    player = ParkourPlayer()..position = Vector2(100, 500);
+    villain = Villain(currentLevel)..position = Vector2(700, 300);
+    
+    addAll([player, villain]);
+
+    // Add visual effects
+    add(WeatherSystem());
+  }
+
+  void _generatePlatforms() {
+    // Generate platforms of varying heights and sizes
+    final random = math.Random();
+    
+    for (int i = 0; i < 10; i++) {
+      final platform = Platform(
+        Vector2(i * 100.0, 300 + random.nextDouble() * 200),
+        Vector2(80, 20),
+      );
+      platforms.add(platform);
+      add(platform);
     }
 
-    // Add chains for movement
+    // Add some floating platforms
+    for (int i = 0; i < 5; i++) {
+      final platform = Platform(
+        Vector2(random.nextDouble() * 700, 200 + random.nextDouble() * 200),
+        Vector2(60, 15),
+      );
+      platforms.add(platform);
+      add(platform);
+    }
+  }
+
+  void _addSwingingChains() {
     for (int i = 0; i < 5; i++) {
       add(ChainLink(Vector2(150 + i * 200, 0)));
     }
-
-    // Initialize players
-    player1 = PlayerSquare(Vector2(100, 400));
-    player2 = PlayerSquare(Vector2(700, 400));
-    addAll([player1, player2]);
-
-    // Initialize opponents
-    spawnOpponent();
-
-    // Add input handling for firing
-    add(FiringDetector(player1));
-    add(FiringDetector(player2));
   }
 
-  void spawnOpponent() {
-    final random = math.Random();
-    final position = Vector2(random.nextDouble() * size.x, random.nextDouble() * size.y / 2);
-    final direction = Vector2(random.nextDouble() - 0.5, 1).normalized();
-    add(OpponentSquare(position: position, direction: direction));
+  void nextLevel() {
+    currentLevel++;
+    // Remove existing villain
+    villain.removeFromParent();
+    // Add new villain with increased difficulty
+    villain = Villain(currentLevel)..position = Vector2(700, 300);
+    add(villain);
+    // Regenerate platforms in new configuration
+    _regeneratePlatforms();
   }
 
-  @override
-  void update(double dt) {
-    super.update(dt);
-    // Spawn opponents periodically
-    if (math.Random().nextDouble() < 0.005) {
-      spawnOpponent();
+  void _regeneratePlatforms() {
+    // Remove existing platforms
+    for (final platform in platforms) {
+      platform.removeFromParent();
     }
-
-    // Collision detection for weapons and opponents
-    children.whereType<Weapon>().forEach((weapon) {
-      children.whereType<OpponentSquare>().forEach((opponent) {
-        if (weapon.toRect().overlaps(opponent.toRect())) {
-          opponent.removeFromParent();
-          weapon.removeFromParent();
-          // Optionally add score or effects here
-        }
-      });
-    });
+    platforms.clear();
+    // Generate new platforms
+    _generatePlatforms();
   }
 }
 
@@ -391,7 +412,7 @@ class SnowParticle extends PositionComponent {
 }
 
 // Update ChainLink to have game reference
-class ChainLink extends PositionComponent with HasGameRef<MultiPlayerShooterGame> {
+class ChainLink extends PositionComponent with HasGameRef<FlameGame> {
   final Paint _paint = Paint()
     ..color = Colors.amberAccent
     ..style = PaintingStyle.stroke
@@ -619,88 +640,6 @@ class Obstacle extends PositionComponent {
       10,
       Paint()..color = Colors.redAccent,
     );
-  }
-}
-
-// Enhanced MultiPlayerShooterGame with new mechanics
-class MultiPlayerShooterGame extends FlameGame with HasCollisionDetection {
-  late ParkourPlayer player;
-  late Villain villain;
-  final List<Platform> platforms = [];
-  int currentLevel = 1;
-
-  @override
-  Future<void> onLoad() async {
-    await super.onLoad();
-    
-    // Add enhanced city scenery
-    add(CityScenery());
-
-    // Add platforms with varying heights
-    _generatePlatforms();
-
-    // Add chains for swinging
-    _addSwingingChains();
-
-    // Add player and villain
-    player = ParkourPlayer()..position = Vector2(100, 500);
-    villain = Villain(currentLevel)..position = Vector2(700, 300);
-    
-    addAll([player, villain]);
-
-    // Add visual effects
-    add(WeatherSystem());
-  }
-
-  void _generatePlatforms() {
-    // Generate platforms of varying heights and sizes
-    final random = math.Random();
-    
-    for (int i = 0; i < 10; i++) {
-      final platform = Platform(
-        Vector2(i * 100.0, 300 + random.nextDouble() * 200),
-        Vector2(80, 20),
-      );
-      platforms.add(platform);
-      add(platform);
-    }
-
-    // Add some floating platforms
-    for (int i = 0; i < 5; i++) {
-      final platform = Platform(
-        Vector2(random.nextDouble() * 700, 200 + random.nextDouble() * 200),
-        Vector2(60, 15),
-      );
-      platforms.add(platform);
-      add(platform);
-    }
-  }
-
-  void _addSwingingChains() {
-    for (int i = 0; i < 5; i++) {
-      add(ChainLink(Vector2(150 + i * 200, 0)));
-    }
-  }
-
-  void nextLevel() {
-    currentLevel++;
-    // Remove existing villain
-    villain.removeFromParent();
-    // Add new villain with increased difficulty
-    villain = Villain(currentLevel)..position = Vector2(700, 300);
-    add(villain);
-    // Regenerate platforms in new configuration
-    _regeneratePlatforms();
-  }
-
-  void _regeneratePlatforms() {
-    // Remove existing platforms
-    for (final platform in platforms) {
-      platform.removeFromParent();
-    }
-    platforms.clear();
-    // Generate new platforms
-    _generatePlatforms();
   }
 }
 
