@@ -324,13 +324,16 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
     // Add visual effects
     add(WeatherSystem());
 
-    // Set up camera with fixed viewport using defaultCamera
-    final worldRect = Rect.fromLTWH(0, 0, 2000, 2000);
-    camera = CameraComponent(world: world)
-      ..viewfinder.visibleGameSize = Vector2(800, 600)
-      ..viewfinder.position = Vector2(400, 300)
-      ..viewfinder.anchor = Anchor.center
-      ..follow(player);
+    // Set up camera viewport instead of using zoom setter
+    camera.viewport = FixedResolutionViewport(
+      resolution: Vector2(800, 600),
+    );
+    
+    // Make the camera follow the player
+    camera.follow(
+      player,
+      worldBounds: Rect.fromLTWH(0, 0, 2000, 2000), // Adjust world bounds as needed
+    );
   }
 
   @override
@@ -547,13 +550,8 @@ class ChainLink extends PositionComponent with HasGameRef<FlameGame> {
     
     canvas.restore();
   }
-}
+} // Added missing closing brace for ChainLink
 
-extension on CameraComponent {
-  set zoom(double zoom) {}
-}
-
-// New ParkourPlayer class
 class ParkourPlayer extends SpriteComponent with HasGameRef<FlameGame> {
   static const double JUMP_VELOCITY = -400.0;
   static const double MOVE_SPEED = 200.0;
