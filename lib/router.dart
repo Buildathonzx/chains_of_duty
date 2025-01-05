@@ -101,5 +101,9 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
+    GoRoute(
+      path: '/play',
+      builder: (context, state) => const LevelSelectionScreen(),
+    ),
   ],
 );
