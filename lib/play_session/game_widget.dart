@@ -17,7 +17,7 @@ import '../level_selection/levels.dart';
 class MyGameWidget extends StatelessWidget {
   final flame.Game game;
 
-  const MyGameWidget({required this.game, super.key});
+  const MyGameWidget({required this.game, super.key, required Map<String, Widget Function(dynamic ctx, dynamic game)> overlayBuilderMap});
 
   @override
   Widget build(BuildContext context) {
