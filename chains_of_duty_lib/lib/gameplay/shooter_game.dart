@@ -74,7 +74,8 @@ class PlayerSquare extends SpriteComponent with HasGameRef<FlameGame> {
   }
 }
 
-class EnemySquare extends SpriteComponent {
+// Corrected EnemySquare to properly initialize sprite
+class EnemySquare extends SpriteComponent with HasGameRef<FlameGame> {
   static const _speed = 100.0;
   final Vector2 direction;
 
@@ -86,7 +87,8 @@ class EnemySquare extends SpriteComponent {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = await Sprite.load('assets/images/enemy.png'); // Updated path
+    final image = await gameRef.images.load('assets/images/enemy.png'); // Corrected path
+    sprite = Sprite(image);
   }
 
   @override
@@ -271,7 +273,8 @@ class Weapon extends SpriteComponent with HasGameRef<FlameGame> {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = await gameRef.loadSprite('assets/images/weapon.png'); // Updated path
+    final image = await gameRef.images.load('assets/images/weapon.png'); // Updated path
+    sprite = Sprite(image);
   }
 
   @override
@@ -285,7 +288,7 @@ class Weapon extends SpriteComponent with HasGameRef<FlameGame> {
   }
 }
 
-// OpponentSquare with Red Tag
+// Corrected OpponentSquare to properly initialize sprite
 class OpponentSquare extends SpriteComponent with HasGameRef<FlameGame> {
   static const _speed = 100.0;
   final Vector2 direction;
@@ -302,7 +305,8 @@ class OpponentSquare extends SpriteComponent with HasGameRef<FlameGame> {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = (await gameRef.images.load('assets/images/enemy.png')) as Sprite?; // Corrected path
+    final image = await gameRef.images.load('assets/images/enemy.png'); // Corrected path
+    sprite = Sprite(image);
   }
 
   @override
@@ -514,7 +518,7 @@ class MultiPlayerShooterGame extends FlameGame with KeyboardEvents, HasCollision
 }
 
 // FiringDetector for handling weapon firing
-class FiringDetector extends Component {
+class FiringDetector extends Component with HasGameRef<FlameGame> {
   final PlayerSquare player;
 
   FiringDetector(this.player);
@@ -589,6 +593,7 @@ class ChainLink extends PositionComponent with HasGameRef<FlameGame> {
   }
 } // Added missing closing brace for ChainLink
 
+// Corrected ParkourPlayer to properly initialize sprite
 class ParkourPlayer extends SpriteComponent with HasGameRef<FlameGame> {
   static const double JUMP_VELOCITY = -400.0;
   static const double MOVE_SPEED = 200.0;
@@ -604,6 +609,9 @@ class ParkourPlayer extends SpriteComponent with HasGameRef<FlameGame> {
 
   @override
   Future<void> onLoad() async {
+    await super.onLoad();
+    final image = await gameRef.images.load('assets/images/player.png'); // Ensure player image exists
+    sprite = Sprite(image);
     // Yellow character
     paint = Paint()..color = Colors.amber;
     // Add hitbox for collisions
@@ -648,7 +656,7 @@ class ParkourPlayer extends SpriteComponent with HasGameRef<FlameGame> {
   }
 }
 
-// New Villain class
+// Corrected Villain to properly initialize sprite
 class Villain extends SpriteComponent with HasGameRef<FlameGame> {
   Vector2 velocity = Vector2.zero();
   List<Vector2> pathPoints = [];
@@ -661,7 +669,10 @@ class Villain extends SpriteComponent with HasGameRef<FlameGame> {
 
   @override
   Future<void> onLoad() async {
-    paint = Paint()..color = Colors.red;
+    await super.onLoad();
+    final imagePath = 'assets/images/villain.png'; // Ensure villain image exists
+    final image = await gameRef.images.load(imagePath);
+    sprite = Sprite(image);
     // Add more complex behavior based on level
     switch (level) {
       case 1:
