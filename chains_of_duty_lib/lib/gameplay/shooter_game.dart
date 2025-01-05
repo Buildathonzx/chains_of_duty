@@ -302,7 +302,7 @@ class OpponentSquare extends SpriteComponent with HasGameRef<FlameGame> {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = await gameRef.images.load('assets/images/enemy.png'); // Corrected path
+    sprite = (await gameRef.images.load('assets/images/enemy.png')) as Sprite?; // Corrected path
   }
 
   @override
